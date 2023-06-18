@@ -25,7 +25,8 @@ def create_messages_table():
             conversation_id TEXT NOT NULL,
             sender TEXT NOT NULL,
             message_file TEXT NOT NULL,
-            message_type TEXT NOT NULL
+            tags TEXT
+
         )
     """)
     conn.commit()
@@ -44,7 +45,7 @@ def generate_conversation_id():
     return f"{timestamp}_{uuid_part}"
 
 # Function to store a message in the database and file system
-def store_message(conversation_id, sender, message, message_types):
+def store_message(conversation_id, sender, message, tags):
     conn = get_db_connection()
     c = conn.cursor()
 
@@ -58,13 +59,10 @@ def store_message(conversation_id, sender, message, message_types):
     with open(os.path.join("messages", conversation_id, message_file), "w") as f:
         f.write(message)
 
-    # Serialize the message types
-    serialized_message_types = json.dumps(message_types)
-
-    # Store the message details in the database
-    c.execute("INSERT INTO messages (conversation_id, sender, message_file, message_types) VALUES (?, ?, ?, ?)",
-              (conversation_id, sender, message_file, serialized_message_types))
-
+    # Serialize the message tags
+    serialized_tags = json.dumps(tags)
+    c.execute("INSERT INTO messages (conversation_id, sender, message_file, tags) VALUES (?, ?, ?, ?)",
+              (conversation_id, sender, message_file, serialized_tags))
     conn.commit()
     conn.close()
 
@@ -73,7 +71,9 @@ def store_message(conversation_id, sender, message, message_types):
 def add_message(conversation_id):
     data = request.get_json(force=True)
     message = data["message"]
-    store_message(conversation_id, "user", message)  # Store the user's message
+    tags = data.get("tags", [])  # Get the tags from the request data, default to an empty list if not provided
+
+    store_message(conversation_id, "user", message, tags)  # Store the user's message
     return Response(response="OK", status=200)
 
 @app.route("/messages/<string:conversation_id>", methods=["GET"])

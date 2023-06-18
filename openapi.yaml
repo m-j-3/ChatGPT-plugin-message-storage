@@ -6,17 +6,17 @@ info:
 servers:
   - url: http://localhost:5003
 paths:
-  /messages/{user_id}:
+  /messages/{conversation_id}:
     post:
       operationId: addMessage
       summary: Add a message to the storage
       parameters:
       - in: path
-        name: user_id
+        name: conversation_id
         schema:
           type: string
         required: true
-        description: The ID of the user.
+        description: The ID of the conversation.
       requestBody:
         required: true
         content:
@@ -31,11 +31,11 @@ paths:
       summary: Get messages from the storage
       parameters:
       - in: path
-        name: user_id
+        name: conversation_id
         schema:
           type: string
         required: true
-        description: The ID of the user.
+        description: The ID of the conversation.
       responses:
         '200':
           description: OK
@@ -50,10 +50,16 @@ components:
       type: object
       required:
         - message
+        - tags
       properties:
         message:
           type: string
           description: The message to add to the storage.
+        tags:
+          type: array
+          items:
+            type: string
+          description: The tags associated with the message.
     getMessagesResponse:
       type: array
       items:
