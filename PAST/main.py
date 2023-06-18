@@ -6,7 +6,7 @@ app = Flask(__name__)
 CORS(app)
 
 def get_connection():
-    return sqlite3.connect("messages.db")
+    return sqlite3.connect("messagesOld.db")
 
 def create_table():
     conn = get_connection()

@@ -74,8 +74,6 @@ def add_message(conversation_id):
     data = request.get_json(force=True)
     message = data["message"]
     store_message(conversation_id, "user", message)  # Store the user's message
-    response = "This is ChatGPT's response"  # Replace with the actual response from ChatGPT
-    store_message(conversation_id, "chatgpt", response)  # Store ChatGPT's response
     return Response(response="OK", status=200)
 
 @app.route("/messages/<string:conversation_id>", methods=["GET"])
