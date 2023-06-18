@@ -1,7 +1,7 @@
 {
     "schema_version": "v1",
     "name_for_human": "Chat Storage Plugin (no auth)",
-    "name_for_model": "chat-storage",
+    "name_for_model": "chat_storage",
     
     "description_for_human": "Plugin for storing and managing chat messages exchanged in conversation with ChatGPT.",
     "description_for_model": "Plugin for storing and managing chat messages exchanged in conversation with ChatGPT.",
