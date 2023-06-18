@@ -54,12 +54,12 @@ components:
       properties:
         message:
           type: string
-          description: The message to add to the storage.
+          description: The message that will be stored.
         tags:
           type: array
           items:
             type: string
-          description: The tags associated with the message.
+          description: The tags associated with the message which are words that chatgpt deems relevant to enable more efficient searching.
     getMessagesResponse:
       type: array
       items:
