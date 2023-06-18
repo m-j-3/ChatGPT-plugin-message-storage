@@ -49,7 +49,7 @@ def plugin_logo():
 
 @app.route("/.well-known/ai-plugin.json")
 def plugin_manifest():
-    with open("ai-plugin.json") as f:
+    with open("./.well-known/ai-plugin.json") as f:
         text = f.read()
         return Response(response=text, mimetype="text/json")
 
