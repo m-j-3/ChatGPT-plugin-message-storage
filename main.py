@@ -1,63 +1,47 @@
 import json
+from flask import Flask, request, Response, send_file
 
-import quart
-import quart_cors
-from quart import request
-
-app = quart_cors.cors(quart.Quart(__name__))
+app = Flask(__name__)
 
 # This key can be anything, though you will likely want a randomly generated sequence.
 _SERVICE_AUTH_KEY = "REPLACE_ME"
-_TODOS = {}
+_MESSAGES = {}
 
-def assert_auth_header(req):
-    assert req.headers.get(
-        "Authorization", None) == f"Bearer {_SERVICE_AUTH_KEY}"
+def assert_auth_header():
+    auth_header = request.headers.get("Authorization")
+    assert auth_header == f"Bearer {_SERVICE_AUTH_KEY}"
 
-@app.post("/todos/<string:username>")
-async def add_todo(username):
-    assert_auth_header(quart.request)
-    request = await quart.request.get_json(force=True)
-    if username not in _TODOS:
-        _TODOS[username] = []
-    _TODOS[username].append(request["todo"])
-    return quart.Response(response='OK', status=200)
+@app.route("/messages/<string:user_id>", methods=["POST"])
+def add_message(user_id):
+    assert_auth_header()
+    data = request.get_json(force=True)
+    if user_id not in _MESSAGES:
+        _MESSAGES[user_id] = []
+    _MESSAGES[user_id].append(data["message"])
+    return Response(response="OK", status=200)
 
-@app.get("/todos/<string:username>")
-async def get_todos(username):
-    assert_auth_header(quart.request)
-    return quart.Response(response=json.dumps(_TODOS.get(username, [])), status=200)
+@app.route("/messages/<string:user_id>", methods=["GET"])
+def get_messages(user_id):
+    assert_auth_header()
+    messages = _MESSAGES.get(user_id, [])
+    return Response(response=json.dumps(messages), status=200)
 
-@app.delete("/todos/<string:username>")
-async def delete_todo(username):
-    assert_auth_header(quart.request)
-    request = await quart.request.get_json(force=True)
-    todo_idx = request["todo_idx"]
-    if 0 <= todo_idx < len(_TODOS[username]):
-        _TODOS[username].pop(todo_idx)
-    return quart.Response(response='OK', status=200)
+@app.route("/logo.png")
+def plugin_logo():
+    filename = "logo.png"
+    return send_file(filename, mimetype="image/png")
 
-@app.get("/logo.png")
-async def plugin_logo():
-    filename = 'logo.png'
-    return await quart.send_file(filename, mimetype='image/png')
-
-@app.get("/.well-known/ai-plugin.json")
-async def plugin_manifest():
-    host = request.headers['Host']
+@app.route("/.well-known/ai-plugin.json")
+def plugin_manifest():
     with open("ai-plugin.json") as f:
         text = f.read()
-        return quart.Response(text, mimetype="text/json")
+        return Response(response=text, mimetype="text/json")
 
-@app.get("/openapi.yaml")
-async def openapi_spec():
-    host = request.headers['Host']
+@app.route("/openapi.yaml")
+def openapi_spec():
     with open("openapi.yaml") as f:
         text = f.read()
-        return quart.Response(text, mimetype="text/yaml")
-
-def main():
-    app.run(debug=True, host="0.0.0.0", port=5002)
+        return Response(response=text, mimetype="text/yaml")
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True, host="0.0.0.0", port=5002)
