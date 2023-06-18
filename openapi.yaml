@@ -58,4 +58,4 @@ components:
       type: array
       items:
         type: string
-      description: The list of messages.
+      description: The message.
