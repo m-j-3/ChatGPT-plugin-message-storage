@@ -1,23 +1,18 @@
 {
     "schema_version": "v1",
-    "name_for_human": "TODO List (service auth)",
-    "name_for_model": "todo",
-    "description_for_human": "Manage your TODO list. You can add, remove and view your TODOs.",
-    "description_for_model": "Plugin for managing a TODO list, you can add, remove and view your TODOs.",
-    "auth": {
-        "type": "service_http",
-        "authorization_type": "bearer",
-        "verification_tokens": {
-            "openai": "Replace_this_string_with_the_verification_token_generated_in_the_ChatGPT_UI"
-        }
+    "name_for_human": "Chat Storage Plugin (no auth)",
+    "name_for_model": "chat-storage",
+    
+    "description_for_human": "Plugin for storing and managing chat messages exchanged in conversation with ChatGPT.",
+    "description_for_model": "Plugin for storing and managing chat messages exchanged in conversation with ChatGPT.",
+        "auth": {
+      "type": "none"
     },
     "api": {
-        "type": "openapi",
-        "url": "http://localhost:5003/openapi.yaml"
-      },
-      "logo_url": "http://localhost:5003/logo.png",
-      "contact_email": "legal@example.com",
-      "legal_info_url": "http://example.com/legal"
-    }
-    
+      "type": "openapi",
+      "url": "http://localhost:5003/openapi.yaml"
+    },
+    "logo_url": "http://localhost:5003/logo.png",
+    "contact_email": "michaelpics52@gmail.com"
+  }
   
