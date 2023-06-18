@@ -1,93 +1,53 @@
 import sqlite3
 import json
-import os
-import uuid
-from datetime import datetime
 from flask import Flask, request, Response, send_file
 from flask_cors import CORS
-
 app = Flask(__name__)
 CORS(app)
 
-# Connect to the SQLite database
-def get_db_connection():
-    conn = sqlite3.connect("messages.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+def get_connection():
+    return sqlite3.connect("messages.db")
 
-# Create the messages table if it doesn't exist
-def create_messages_table():
-    conn = get_db_connection()
+def create_table():
+    conn = get_connection()
     c = conn.cursor()
     c.execute("""
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            conversation_id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
             sender TEXT NOT NULL,
-            message_file TEXT NOT NULL,
-            message_type TEXT NOT NULL
+            message TEXT NOT NULL
         )
     """)
     conn.commit()
     conn.close()
 
-# Create the messages folder if it doesn't exist
-def create_messages_folder(conversation_id):
-    folder_path = os.path.join("messages", conversation_id)
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-
-# Function to generate a unique conversation ID
-def generate_conversation_id():
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")  # Format: YYYYMMDDHHMMSSffffff
-    uuid_part = str(uuid.uuid4()).replace("-", "")  # Remove hyphens from UUID
-    return f"{timestamp}_{uuid_part}"
-
-# Function to store a message in the database and file system
-def store_message(conversation_id, sender, message, message_type):
-    conn = get_db_connection()
+def store_message(user_id, sender, message):
+    conn = get_connection()
     c = conn.cursor()
-
-    # Generate a unique filename for the message file
-    message_file = f"{conversation_id}_{sender}_{c.lastrowid}.txt"
-
-    # Create the conversation folder if it doesn't exist
-    create_messages_folder(conversation_id)
-
-    # Write the message to a file
-    with open(os.path.join("messages", conversation_id, message_file), "w") as f:
-        f.write(message)
-
-    # Store the message details in the database
-    c.execute("INSERT INTO messages (conversation_id, sender, message_file, message_type) VALUES (?, ?, ?, ?)",
-              (conversation_id, sender, message_file, message_type))
-
+    c.execute("INSERT INTO messages (user_id, sender, message) VALUES (?, ?, ?)", (user_id, sender, message))
     conn.commit()
     conn.close()
 
-@app.route("/messages/<string:conversation_id>", methods=["POST"])
-def add_message(conversation_id):
+def get_messages(user_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("SELECT sender, message FROM messages WHERE user_id=?", (user_id,))
+    rows = c.fetchall()
+    messages = [{"sender": row[0], "message": row[1]} for row in rows]
+    conn.close()
+    return messages
+
+@app.route("/messages/<string:user_id>", methods=["POST"])
+def add_message(user_id):
     data = request.get_json(force=True)
     message = data["message"]
-
-    store_message(conversation_id, "user", message, "text")  # Store the user's text message
-
+    store_message(user_id, "user", message)
     return Response(response="OK", status=200)
 
-@app.route("/messages/<string:conversation_id>", methods=["GET"])
-def get_messages(conversation_id):
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("SELECT message_file FROM messages WHERE conversation_id=?", (conversation_id,))
-    message_files = [row[0] for row in c.fetchall()]
-    conn.close()
-
-    messages = []
-    for message_file in message_files:
-        with open(os.path.join("messages", conversation_id, message_file), "r") as f:
-            message = f.read()
-            messages.append(message)
-
+@app.route("/messages/<string:user_id>", methods=["GET"])
+def get_user_messages(user_id):
+    messages = get_messages(user_id)
     return Response(response=json.dumps(messages), status=200)
 
 @app.route("/logo.png")
@@ -108,5 +68,5 @@ def openapi_spec():
         return Response(response=text, mimetype="text/yaml")
 
 if __name__ == "__main__":
-    create_messages_table()  # Initialize the messages table
+    create_table()  # Create the table before running the app
     app.run(debug=True, host="0.0.0.0", port=5003)
