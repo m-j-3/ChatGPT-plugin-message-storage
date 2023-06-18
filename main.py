@@ -44,13 +44,19 @@ def generate_conversation_id():
     uuid_part = str(uuid.uuid4()).replace("-", "")  # Remove hyphens from UUID
     return f"{timestamp}_{uuid_part}"
 
+# Function to generate a unique filename for the message file
+def generate_message_filename(conversation_id, sender):
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")  # Format: YYYYMMDDHHMMSSffffff
+    unique_id = str(uuid.uuid4()).replace("-", "")  # Remove hyphens from UUID
+    return f"{conversation_id}_{sender}_{timestamp}_{unique_id}.txt"
+
 # Function to store a message in the database and file system
 def store_message(conversation_id, sender, message, tags):
     conn = get_db_connection()
     c = conn.cursor()
 
     # Generate a unique filename for the message file
-    message_file = f"{conversation_id}_{sender}_{c.lastrowid}.txt"
+    message_file = generate_message_filename(conversation_id, sender)
 
     # Create the conversation folder if it doesn't exist
     create_messages_folder(conversation_id)
