@@ -77,7 +77,7 @@ def store_message(conversation_id, sender, message, tags):
 def add_message(conversation_id):
     data = request.get_json(force=True)
     message = data["message"]
-    tags = data.get("tags", [])  # Get the tags from the request data, default to an empty list if not provided
+    tags = data["tags"]  # Get the tags from the request data, default to an empty list if not provided
 
     store_message(conversation_id, "user", message, tags)  # Store the user's message
     return Response(response="OK", status=200)
