@@ -1,9 +1,9 @@
 import sqlite3
 import json
 from flask import Flask, request, Response, send_file
-
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app)
 # Connect to the SQLite database
 conn = sqlite3.connect("messages.db")
 c = conn.cursor()
