@@ -1,2 +1,2 @@
-# ChatGPT plugin stuff
- seeing what kinda stuff i can make
+# ChatGPT-plugin-message-storage
+ Storing and managing chat messages exchanged with ChatGPT
