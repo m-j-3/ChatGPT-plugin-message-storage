@@ -1,0 +1,1 @@
+please use the actual real chat storage plugin that is enabled in this conversation to store every single message in this chat with tags that you think would be useful to enhance managing the messages when it comes to searching through the entire database of messages, and be sure to not only store my messages but your responses as well, and please store everything word for word
